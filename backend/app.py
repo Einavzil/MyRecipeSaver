@@ -26,7 +26,7 @@ def register():
 
     #check that the username is unique
     if users_collection.find_one({'username': username}):
-        return jsonify({'message': 'Username already exists'}), 409
+        return jsonify({'message': 'Username already exists'}), 400
     
     #hash the password with bcrypt
     hashed_password = (bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())).decode('utf-8')
@@ -72,9 +72,8 @@ def login():
     
 @app.route('/recipe', methods=['POST'])
 def new_recipe():
-    #get logged in token and body data
-    token = request.headers['Authorization']
     try:
+        token = request.headers['Authorization']
         user_id= retrive_id(token)
     except Exception:
         return jsonify({'message':'Invalid JWT token'}), 401
@@ -98,8 +97,8 @@ def new_recipe():
 
 @app.route('/recipe', methods=['GET'])
 def get_recipe_list():
-    token = request.headers['Authorization']
     try:
+        token = request.headers['Authorization']
         user_id = retrive_id(token)
     except Exception:
         return jsonify({'message':'Invalid JWT token'}), 401
@@ -108,14 +107,14 @@ def get_recipe_list():
 
     for recipe in recipe_list:
         recipe['_id'] = str(recipe['_id'])
-        recipe['userId'] = str(recipe['userId']) # Convert user ID as well
+        recipe['userId'] = str(recipe['userId'])
     
     return jsonify({'recipes': recipe_list}), 200
 
 @app.route('/recipe/<recipe_id>', methods=['GET'])
 def get_single_recipe(recipe_id):
-    token = request.headers['Authorization']
     try:
+        token = request.headers['Authorization']
         user_id = retrive_id(token)
     except Exception:
         return jsonify({'message':'Invalid JWT token'}), 401
@@ -135,8 +134,8 @@ def get_single_recipe(recipe_id):
     
 @app.route('/recipe/<recipe_id>', methods=['PUT'])
 def update_recipe(recipe_id):
-    token = request.headers['Authorization']
     try:
+        token = request.headers['Authorization']
         user_id = retrive_id(token)
     except Exception:
         return jsonify({'message':'Invalid JWT token'}), 401
