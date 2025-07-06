@@ -77,15 +77,16 @@ export default {
 
     methods: {
          async handleLogin() {
-            const response = await loginUser(this.username, this.password);
-            console.log('Login response:', response);
-
-            if (response && response.userToken) {
-                localStorage.setItem('token', response.userToken);
-                localStorage.setItem('userId', response.userId);
-                await this.$router.push({ name: 'recipe-list' }); // Redirect to the recipes page after successful login
-            } else {
-                this.errorMessage = 'Login failed. Please check your credentials.';
+            try{
+              const response = await loginUser(this.username, this.password);
+              console.log('Login response:', response);
+              localStorage.setItem('token', response.userToken);
+              localStorage.setItem('userId', response.userId);
+              this.$root.checkLoginStatus();
+              await this.$router.push({ name: 'recipe-list' });
+            } catch(error) {
+              console.error('Login error:', error);
+              this.errorMessage = 'Login failed. Please check your credentials.';
             }
          }
     }

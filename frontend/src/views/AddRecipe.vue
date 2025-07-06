@@ -138,13 +138,19 @@ export default {
         }
     },
     async mounted() {
+      try{
         const storedUserId = localStorage.getItem('userId');
         const storedUserToken = localStorage.getItem('token');
         if (!storedUserToken || !storedUserId) {
             this.errorMessage = 'User not logged in. Please log in to add recipes.';
-            this.$router.push({ name: 'login' });
+            this.$router.push('/login');
             return;
         }
+      } catch (error) {
+          this.errorMessage = 'User not logged in. Please log in to add recipes.';
+          this.$router.push('/login');
+          return;
+      }
     },
     methods: {
         // add a new ingredient to the list
