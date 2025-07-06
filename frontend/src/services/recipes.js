@@ -2,7 +2,7 @@ import { getAuthHeaders } from "./auth";
 
 const API_BASE_URL = 'http://localhost:5000';
 
-export const fetchRecipes = async (userId) => {
+export const fetchRecipes = async () => {
     try {
         const response = await fetch(`${API_BASE_URL}/recipe`, {
         method: 'GET',
@@ -11,7 +11,9 @@ export const fetchRecipes = async (userId) => {
         const data = await response.json();
 
         if (!response.ok) {
-            throw new Error(data.message || 'Failed to fetch recipes');
+            let error = new Error(data.message || 'Failed to fetch recipes');
+            error.status = response.status; // Attach the status code to the error
+            throw error;
         }
         console.log('Fetched recipes:', data);
         return data; 
@@ -21,18 +23,19 @@ export const fetchRecipes = async (userId) => {
     }
 };
 
-export const fetchSingleRecipe = async (recipeId) => { // <-- Add 'headers' parameter here
+export const fetchSingleRecipe = async (recipeId) => {
     try {
-        // Use the 'headers' parameter directly
         const response = await fetch(`${API_BASE_URL}/recipe/${recipeId}`, {
             method: 'GET',
-            headers: getAuthHeaders(), // <-- Use the passed 'headers' object here
+            headers: getAuthHeaders(), 
         });
 
         const data = await response.json();
 
         if (!response.ok) {
-            throw new Error(data.message || 'Failed to fetch recipe');
+            let error = new Error(data.message || 'Failed to fetch recipe');
+            error.status = response.status;
+            throw error;
         }
         console.log('Fetched recipe:', data);
         return data;
@@ -49,7 +52,13 @@ export const addRecipe = async (recipeData) => {
             headers: getAuthHeaders(),
             body: JSON.stringify(recipeData)
         });
+     
         const data = await response.json();
+        if (!response.ok) {
+            let error = new Error(data.message || 'Failed to add recipe');
+            error.status = response.status;
+            throw error;
+        }
         return data;
     } catch (error) {
         console.error('Error adding recipe:', error);
@@ -67,7 +76,9 @@ export const updateRecipe = async (recipeId, updatedData) => {
         const data = await response.json();
 
         if (!response.ok) {
-            throw new Error(data.message || 'Failed to update recipe');
+            let error = new Error(data.message || 'Failed to update recipe');
+            error.status = response.status;
+            throw error;
         }
         console.log('Updated recipe:', data);
         return data;
@@ -86,7 +97,9 @@ export const deleteRecipe = async (recipeId) => {
         const data = await response.json();
 
         if (!response.ok) {
-            throw new Error(data.message || 'Failed to delete recipe');
+            let error = new Error(data.message || 'Failed to delete recipe');
+            error.status = response.status;
+            throw error;
         }
         console.log('Deleted recipe:', data);
         return data;

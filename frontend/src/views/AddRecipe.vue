@@ -62,10 +62,15 @@
 
             <BFormGroup label="Ingredients:" class="mb-3">
               <div v-for="(ingredient, index) in recipe.ingredients" :key="index" class="d-flex mb-2">
-                <BFormInput v-model="ingredient.quantity" placeholder="Quantity" class="me-2" style="width: 25%;"></BFormInput>
-                <BFormInput v-model="ingredient.unit" placeholder="Unit" class="me-2" style="width: 25%;"></BFormInput>
+                <BFormInput v-model="ingredient.quantity" type="number" placeholder="Quantity" class="me-2" style="width: 25%;"></BFormInput>
+                <BFormSelect v-model="ingredient.unit" :options="ingredientsUnits" placeholder="Select unit" class="me-2 form-control" style="width: 35%;">
+                  <template #first>
+                    <option value="" disabled>Unit</option>
+                  </template>
+                </BFormSelect>
+                
                 <BFormInput v-model="ingredient.name" placeholder="Name (e.g., Pasta)" required></BFormInput>
-                <BButton variant="danger" size="sm" class="ms-2" @click="removeIngredient(index)">-</BButton>
+                <BButton variant="danger" size="sm" class="ms-2" @click="deleteIngredient(index)">-</BButton>
               </div>
               <BButton variant="info" size="sm" @click="addIngredient">Add Ingredient</BButton>
             </BFormGroup>
@@ -94,7 +99,8 @@
 import { addRecipe } from '../services/recipes';
 import {
   BContainer, BRow, BCol, BCard, BForm, BFormGroup, BFormInput, BFormTextarea,
-  BButton, BAlert
+  BButton, BAlert,
+  BFormSelect
 } from 'bootstrap-vue-next'
 
 export default {
@@ -118,7 +124,17 @@ export default {
             cookingTime: {
                 hours: 0,
                 minutes: 0
-            }
+            },
+            ingredientsUnits: [
+              { text: 'grams', value: 'g' },
+              { text: 'kilograms', value: 'kg' },
+              { text: 'liters', value: 'l' },
+              { text: 'milliliters', value: 'ml' },
+              { text: 'cups', value: 'cup' },
+              { text: 'tablespoons', value: 'tbsp' },
+              { text: 'teaspoons', value: 'tsp' },
+              { text: 'units', value: 'units'},
+            ]
         }
     },
     async mounted() {
@@ -201,7 +217,7 @@ export default {
                 }
 
                 // call the addRecipe function to save the recipe
-                const response = await addRecipe(this.recipe);
+                const response = await addRecipe(recipeData);
                 this.successMessage = response.message || 'Recipe added successfully!';
                 console.log('Recipe added:', response);
 
@@ -212,6 +228,12 @@ export default {
             } catch (error) {
                 console.error('Error adding recipe:', error);
                 this.errorMessage = error.message || 'Failed to add recipe.';
+                if (error.status === 401) {
+                    this.errorMessage = 'Unauthorized access. Please log in again.';
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('userId');
+                    this.$router.push('/login'); 
+                }
             }
         },
         resetForm() {

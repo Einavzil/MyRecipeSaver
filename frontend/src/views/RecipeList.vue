@@ -5,7 +5,7 @@
                 <h3 class="text-center mb-5">Your Recipe List</h3>
 
                 <div v-if="loading" class="text-center my-4">
-                    <BSpinner type="grow" label="Loading..."></BSpinner>
+                    <BSpinner type="grow" label=""></BSpinner>
                     <p class="mt-2">Loading recipes...</p>
                 </div>
 
@@ -28,7 +28,7 @@
                 </BListGroup>
 
                 <div class="text-center mt-4">
-                    <BButton variant="success">
+                    <BButton variant="success" @click="$router.push('/add-recipe')" class="w-100">
                         Add New Recipe
                     </BButton>
                 </div>
@@ -58,6 +58,7 @@ import { BContainer, BRow, BCol, BSpinner, BListGroup, BListGroupItem,
             if (!userToken) {
                 this.errorMessage = 'User not logged in. Please log in to view recipes.';
                 this.loading = false;
+                this.$router.push('/login'); // Redirect to login page
                 return;
             }
             // fetch recipes for the logged in user
@@ -72,10 +73,17 @@ import { BContainer, BRow, BCol, BSpinner, BListGroup, BListGroupItem,
                     this.recipeList = response.recipes;
                     console.log('Fetched recipes:', response.recipes);
                 } catch(error) {
-                    this.errorMessage = 'Failed to fetch recipes. Please try again later.';
-                    this.recipeList = [];
-                    // Log error for debugging
-                    console.error('Error fetching recipes:', error);
+                    if (error.status === 401) {
+                        this.errorMessage = 'Unauthorized access. Please log in again.';
+                        localStorage.removeItem('token'); // Clear token on unauthorized access
+                        this.$router.push('/login'); // Redirect to login page
+                    } else {
+                        this.errorMessage = 'Failed to fetch recipes. Please try again later.';
+                        this.recipeList = [];
+                        // Log error for debugging
+                        console.error('Error fetching recipes:', error);
+                    }
+                    
                 } finally {
                     this.loading = false;
                 }

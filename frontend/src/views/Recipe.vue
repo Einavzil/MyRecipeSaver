@@ -6,7 +6,7 @@
                     <h1 class="text-center mb-3">Recipe Details</h1>
                         
                     <div v-if="loading" class="text-center my-4">
-                        <BSpinner type="grow" label="Loading..."></BSpinner>
+                        <BSpinner type="grow" label=""></BSpinner>
                         <p class="mt-2">Loading recipe...</p>
                     </div>
 
@@ -101,6 +101,12 @@ export default {
                 console.error('Error fetching recipe:', error);
                 // Ensure errorMessage is updated if an error occurs
                 this.errorMessage = error.message || 'Failed to fetch recipe details.';
+                if (error.status === 401) {
+                    // Handle unauthorized access
+                    this.errorMessage = 'Unauthorized access. Please log in again.';
+                    localStorage.removeItem('token'); // Clear token on unauthorized access
+                    this.$router.push('/login'); // Redirect to login page
+                }
             } finally {
                 this.loading = false; // Set loading state to false after fetching
             }

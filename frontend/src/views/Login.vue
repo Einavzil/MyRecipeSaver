@@ -67,6 +67,13 @@ export default {
             errorMessage: null
         };
     },
+    mounted() {
+        // Check if user is already logged in
+        const userToken = localStorage.getItem('token');
+        if (userToken) {
+            this.$router.push({ name: 'recipe-list' }); // Redirect to the recipes page if already logged in
+        }
+    },
 
     methods: {
          async handleLogin() {
